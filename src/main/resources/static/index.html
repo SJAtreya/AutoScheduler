@@ -1,0 +1,89 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd" >
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Appointment Booking Request Simulator</title>
+<link rel="stylesheet" href="styles/bootstrap.min.css" />
+<link rel="stylesheet" href="styles/bootstrap-datetimepicker.min.css" />
+<link rel="stylesheet" href="styles/jquery-ui.min.css"/>
+<link rel="stylesheet" href="styles/jquery-ui.structure.min.css"/>
+<link rel="stylesheet" href="styles/jquery-ui.theme.min.css"/>
+<link rel="stylesheet" href="styles/scheduler.css"/>
+</head>
+<body>
+	<div class="container">
+		<div class="jumbotron">
+			<h1>Auto Scheduler Demo</h1>
+		</div>
+
+		<div class="row">
+			<div class="col-md-3">
+				<div class="form-group">
+					<div class='input-group date' id='startDate'>
+						<input type='text' class="form-control" /> <span
+							class="input-group-addon"> <span
+							class="glyphicon glyphicon-calendar"></span>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<div class="input-group">
+						<input name="numDays" id="numDays" placeholder="Number of days"
+							class="form-control" />
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="form-group">
+					<div class="input-group">
+						<input name="numRequests" id="numRequests"
+							placeholder="Number of Requests" class="form-control" />
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<button class="btn btn-primary" id="simulate">Simulate</button>
+			</div>
+		</div>
+
+		<div class="row">
+			<div>
+				<ul class="nav nav-pills">
+					<li id="tab1" role="presentation" class="active"><a href="#tabs-1">Appointment Booking Status</a></li>
+					<li id="tab2" role="presentation"><a href="#tabs-2">Provider Schedule</a></li>
+				</ul>
+				<div id="tabs-1" class="borderEnabled">
+					<table class="table table-striped" id="results" name="results">
+						<tr>
+							<th>Service</th>
+							<th>Requested Date</th>
+							<th>Proposed Date</th>
+							<th>Proposed Time</th>
+						</tr>
+					</table>
+				</div>
+				<div id="tabs-2" class="borderEnabled">
+					<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+				</div>
+			</div>
+		</div>
+
+		<script type="text/javascript" src="scripts/jquery.min.js"></script>
+		<script type="text/javascript" src="scripts/moment.min.js"></script>
+		<script type="text/javascript" src="scripts/bootstrap.min.js"></script>
+		<script type="text/javascript"
+			src="scripts/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="scripts/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="scripts/canvasjs.min.js"></script>
+		<script type="text/javascript" src="scripts/jquery.canvasjs.min.js"></script>
+		<script type="text/javascript" src="scripts/autoscheduler.js"></script>
+		
+		<script>
+			$(document).ready(function() {
+				setup();
+			});
+		</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+#tabs-1 {
+	font-size: 14px;
+}
+
+.ui-widget-header {
+	background: lightgray;
+	border: 1px solid #004080;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+.borderEnabled{
+	border: 1px solid #004080;	
+}
