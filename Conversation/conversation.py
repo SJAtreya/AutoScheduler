@@ -9,7 +9,7 @@ days = [calendar.day_name[i].lower() for i in range(0,7)]
 months_abbr = [calendar.month_abbr[i].lower() for i in range(1,13)]
 days_abbr = [calendar.day_abbr[i].lower() for i in range(0,7)]
 start_preps = ['at','on','from','between','after','post']
-end_preps = ['before','to','pre','and']
+end_preps = ['at','before','to','pre','and']
 number_words = {num2words(i).lower().replace('-',' '):i for i in range(1,59)}
 
 def match(value,lst_values):
@@ -129,7 +129,7 @@ def get_time(word,tagged,index):
 def populate_time(tagged,index,word,ret_val):
     if is_start_time(word,tagged,index) and 'startTime' not in ret_val:
         ret_val['startTime']=get_time(word,tagged,index)
-    elif is_end_time(word,tagged,index) and 'endTime' not in ret_val:
+    if is_end_time(word,tagged,index) and 'endTime' not in ret_val:
         ret_val['endTime']=get_time(word,tagged,index)
             
 
@@ -145,6 +145,8 @@ def parse_sentence(sentence):
     {'date': '??/SUN/2016', 'startTime': 13}
     >>> parse_sentence('Is there a slot available on Tuesday before twelve PM?')
     {'date': '??/TUE/2016', 'endTime': 12}
+    >>> parse_sentence('Can we meet at 7 PM ?')
+    {'endTime': 19, 'startTime': 19}
     """
     ret_val=dict()
     tagged = nltk.pos_tag(nltk.word_tokenize(sentence))
