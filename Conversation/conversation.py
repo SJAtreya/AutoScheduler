@@ -9,7 +9,7 @@ days = [calendar.day_name[i].lower() for i in range(0,7)]
 months_abbr = [calendar.month_abbr[i].lower() for i in range(1,13)]
 days_abbr = [calendar.day_abbr[i].lower() for i in range(0,7)]
 start_preps = ['at','on','from','between','after','post']
-end_preps = ['before','to','pre','and']
+end_preps = ['at','before','to','pre','and']
 number_words = {num2words(i).lower().replace('-',' '):i for i in range(1,59)}
 
 def match(value,lst_values):
@@ -129,22 +129,24 @@ def get_time(word,tagged,index):
 def populate_time(tagged,index,word,ret_val):
     if is_start_time(word,tagged,index) and 'startTime' not in ret_val:
         ret_val['startTime']=get_time(word,tagged,index)
-    elif is_end_time(word,tagged,index) and 'endTime' not in ret_val:
+    if is_end_time(word,tagged,index) and 'endTime' not in ret_val:
         ret_val['endTime']=get_time(word,tagged,index)
             
 
 def parse_sentence(sentence):
     """ Test the parsing of the sentence
     >>> parse_sentence('Is there a slot available on Sunday post 2 PM?')
-    {'day': 'sunday', 'startTime': 14}
+    {'date': '??/SUN/2016', 'startTime': 14}
     >>> parse_sentence('Could you offer a slot between 9 and 12 on 30th December')
     {'date': '12/30/2016', 'endTime': 12, 'startTime': 9}
     >>> parse_sentence('before 10 AM. Is it possible?')
     {'endTime': 10}
     >>> parse_sentence('Is there a slot available on Sunday after 1PM?')
-    {'day': 'sunday', 'startTime': 13}
+    {'date': '??/SUN/2016', 'startTime': 13}
     >>> parse_sentence('Is there a slot available on Tuesday before twelve PM?')
-    {'endTime': 12, 'day': 'tuesday'}
+    {'date': '??/TUE/2016', 'endTime': 12}
+    >>> parse_sentence('Can we meet at 7 PM ?')
+    {'endTime': 19, 'startTime': 19}
     """
     ret_val=dict()
     tagged = nltk.pos_tag(nltk.word_tokenize(sentence))
@@ -154,6 +156,13 @@ def parse_sentence(sentence):
             populate_day_or_date(tagged,index,word.lower(),ret_val)
         elif tag == 'IN' or ('startTime' in ret_val and tag == 'CC') or word.lower() == 'post': # Chance of this being a time
             populate_time(tagged,index,word.lower(),ret_val)
+    if 'day' in ret_val:
+        my_date = '??/??/2016'
+        if 'date' in ret_val:
+            my_date = ret_val['date']
+        existing_date_vals = my_date.split('/')
+        ret_val['date']='{}/{}/2016'.format(existing_date_vals[0],ret_val['day'][0:3].upper())
+        del ret_val['day']
     return ret_val
                     
 
