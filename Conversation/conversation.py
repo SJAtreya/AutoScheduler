@@ -136,15 +136,15 @@ def populate_time(tagged,index,word,ret_val):
 def parse_sentence(sentence):
     """ Test the parsing of the sentence
     >>> parse_sentence('Is there a slot available on Sunday post 2 PM?')
-    {'day': 'sunday', 'startTime': 14}
+    {'date': '??/SUN/2016', 'startTime': 14}
     >>> parse_sentence('Could you offer a slot between 9 and 12 on 30th December')
     {'date': '12/30/2016', 'endTime': 12, 'startTime': 9}
     >>> parse_sentence('before 10 AM. Is it possible?')
     {'endTime': 10}
     >>> parse_sentence('Is there a slot available on Sunday after 1PM?')
-    {'day': 'sunday', 'startTime': 13}
+    {'date': '??/SUN/2016', 'startTime': 13}
     >>> parse_sentence('Is there a slot available on Tuesday before twelve PM?')
-    {'endTime': 12, 'day': 'tuesday'}
+    {'date': '??/TUE/2016', 'endTime': 12}
     """
     ret_val=dict()
     tagged = nltk.pos_tag(nltk.word_tokenize(sentence))
@@ -154,6 +154,13 @@ def parse_sentence(sentence):
             populate_day_or_date(tagged,index,word.lower(),ret_val)
         elif tag == 'IN' or ('startTime' in ret_val and tag == 'CC') or word.lower() == 'post': # Chance of this being a time
             populate_time(tagged,index,word.lower(),ret_val)
+    if 'day' in ret_val:
+        my_date = '??/??/2016'
+        if 'date' in ret_val:
+            my_date = ret_val['date']
+        existing_date_vals = my_date.split('/')
+        ret_val['date']='{}/{}/2016'.format(existing_date_vals[0],ret_val['day'][0:3].upper())
+        del ret_val['day']
     return ret_val
                     
 
