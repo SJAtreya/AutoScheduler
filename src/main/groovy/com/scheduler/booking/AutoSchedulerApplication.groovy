@@ -2,7 +2,9 @@ package com.scheduler.booking
 
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Bean
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.web.client.RestTemplate
 
 @SpringBootApplication
 @EnableScheduling
@@ -10,5 +12,10 @@ class AutoSchedulerApplication {
 
 	static void main(String[] args) {
 		SpringApplication.run AutoSchedulerApplication, args
+	}
+	
+	@Bean
+	RestTemplate restTemplate() {
+		new RestTemplate()
 	}
 }

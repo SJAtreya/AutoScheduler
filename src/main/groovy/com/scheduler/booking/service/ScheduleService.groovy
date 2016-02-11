@@ -31,6 +31,9 @@ class ScheduleService {
 	@Autowired
 	ProbabilityDistributor probabilityDistributor
 
+	@Autowired
+	SlotFinderService slotFinderService
+
 	@Transactional
 	def bookAppointment(def dto) {
 		def requestId = createRequest(dto)
@@ -62,7 +65,7 @@ class ScheduleService {
 		def slotToBook = null
 		if (dto.date) {
 			// Has asked for a specific date
-			slotToBook = allocateForDate(dto)
+			slotToBook = slotFinderService.findFirstAvailableSlot(dto,[new Slot(startTime:8.0,endTime:20.0)])
 		}
 		else {
 			slotToBook = doAllocate(dto)
@@ -73,80 +76,6 @@ class ScheduleService {
 		}
 	}
 
-	def allocateForDate(dto) {
-		def service = 	serviceDAO.getServiceDuration(dto.service)
-		dto.serviceName = service.service
-		def serviceDuration = 	service.duration
-		def date = dto.date.substring(0,10)
-		def slotForBooking = null
-		def slotRemainderTime = null
-		def breakPoint = 0
-		while (slotForBooking == null){
-			def availableSlots = findAvailableSlotsForDate(date)
-			for (def slot:availableSlots){
-				if (slot.duration() >= serviceDuration) {
-					slotRemainderTime = slot.duration() - serviceDuration
-					if ((slotRemainderTime == 0) || findProbableFill(slotRemainderTime)) {
-						slotForBooking = new Slot(startTime:slot.startTime,endTime:slot.startTime+serviceDuration, date:date)
-						break;
-					}
-				}
-			}
-			date = getNextDate(date)
-			breakPoint++
-			if (breakPoint>100) {
-				// Enough is enough - Not more than 3 to 4 months in advance.
-				break
-			}
-		}
-		slotForBooking
-	}
-
-	def getNextDate(date) {
-		def calendar = Calendar.getInstance()
-		calendar.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(date.substring(0,10)))
-		def currentDay = calendar.get(Calendar.DAY_OF_WEEK)
-		def daysToAdd = (currentDay < 6) ? 1 : (7-currentDay + 2)
-		calendar.add(Calendar.DATE, daysToAdd)
-		calendar.getTime().format("yyyy-MM-dd")
-	}
-	def findAvailableSlotsForDate(date) {
-		def appointments = appointmentDAO.findAppointmentsForDate(date)
-		def hoursOfOperation = [new Slot(startTime:8.0,endTime:20.0)]
-		appointments.each  { appointment->
-			def newHoursOfOperation = []
-			hoursOfOperation.each {
-				if (!overlaps(it.startTime,it.endTime,appointment.start_time,appointment.end_time)) {
-					newHoursOfOperation.add(new Slot(startTime:it.startTime,endTime:it.endTime))
-				}
-				else {
-					if (it.endTime > appointment.end_time && it.startTime < appointment.start_time) {
-						newHoursOfOperation.add(new Slot(startTime:it.startTime,endTime:appointment.start_time))
-						newHoursOfOperation.add(new Slot(startTime:appointment.end_time,endTime:it.endTime))
-					}
-					else if (it.startTime<appointment.start_time && it.endTime <= appointment.end_time) {
-						newHoursOfOperation.add(new Slot(startTime:it.startTime,endTime:appointment.start_time))
-					} else if (it.startTime>= appointment.start_time && it.endTime > appointment.end_time) {
-						newHoursOfOperation.add(new Slot(startTime:appointment.end_time,endTime:it.endTime))
-						//						println newHoursOfOperation
-					}
-				}
-			}
-			//			println newHoursOfOperation
-			hoursOfOperation = newHoursOfOperation
-			//			println hoursOfOperation
-		}
-		//		println hoursOfOperation
-		hoursOfOperation
-	}
-
-	def overlaps (startTime, endTime, appointmentStartTime, appointmentEndTime) {
-		(startTime < appointmentEndTime)  && (endTime > appointmentStartTime)
-	}
-
-	def findProbableFill(timeLeft) {
-		bookingRequestDAO.getCountOfBookingRequests() < 1000 || schedulerDAO.findProbabilityOfAllocations(timeLeft)
-	}
 
 	def doAllocate(dto) {
 	}
@@ -154,11 +83,36 @@ class ScheduleService {
 	def createRequest(dto) {
 		bookingRequestDAO.create(dto)
 	}
-	
+
 	def getHoursBookedForDuration(startDate, numberOfDays) {
-		def calendar = javax.xml.bind.DatatypeConverter.parseDateTime(startDate) 
+		def calendar = javax.xml.bind.DatatypeConverter.parseDateTime(startDate)
 		calendar.add(Calendar.DAY_OF_YEAR, numberOfDays)
 		bookingRequestDAO.getHoursBookedForDuration(startDate.substring(0,10), calendar.getTime().format("yyyy-MM-dd"))
 	}
-	
+
+
+	def findAvailableSlotsForConversationRequest(parsedData){
+		// Identify Request Type - BEFORE / AFTER / EARLIEST / BETWEEN
+		def type = SchedulerUtils.findConversationRequestType(parsedData)
+		def results = slotFinderService."${'find'+type}" parsedData
+		createConversationResponse(results)
+	}
+
+	def createConversationResponse(results) {
+		def response = "I am sorry. I am unable to find a slot in the near future. Please leave your contact number, we shall get back when we find a best slot for you."
+		if (results?.size()>0) {
+			if (results.size() == 1) {
+				response = "Would a slot on ${results[0].date} at ${SchedulerUtils.convertToTimeFormat(results[0].startTime)} work for you?"
+			} else {
+				response = "I was able to find the following slots. Please let me know the best one that suits you."
+				for (def index=0; index<results.size(); index++) {
+					if (index>=3) {
+						break;
+					}
+					response += "${'<br/>' + results[index].date + ' at ' + SchedulerUtils.convertToTimeFormat(results[index].startTime)}"
+				}
+			}
+		}
+		response.toString()
+	}
 }
