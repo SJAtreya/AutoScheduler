@@ -91,10 +91,18 @@ class ScheduleService {
 	}
 
 
-	def findAvailableSlotsForConversationRequest(parsedData){
+	def findAvailableSlotsForNLTKResponse(parsedData){
 		// Identify Request Type - BEFORE / AFTER / EARLIEST / BETWEEN
 		def type = SchedulerUtils.findConversationRequestType(parsedData)
 		def results = slotFinderService."${'find'+type}" parsedData
+		createConversationResponse(results)
+	}
+	
+	def findAvailableSlotsForStanfordNLPResponse(resultsMap){
+		// Identify Request Type - BEFORE / AFTER / EARLIEST / BETWEEN
+//		def type = SchedulerUtils.findConversationRequestType(resultsMap)
+		def nlpData = SchedulerUtils.translateToNLPFormat(resultsMap)
+		def results = slotFinderService."${'find'+type}" nlpData
 		createConversationResponse(results)
 	}
 

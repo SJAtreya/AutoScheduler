@@ -14,6 +14,7 @@ import com.scheduler.booking.dao.BookingRequestDAO
 import com.scheduler.booking.dao.SchedulerDAO
 import com.scheduler.booking.dao.ServiceDAO
 import com.scheduler.booking.dto.Slot
+import com.scheduler.booking.util.SchedulerUtils;
 
 @Service
 class SlotFinderService {
@@ -59,7 +60,7 @@ class SlotFinderService {
 		def service = 	serviceDAO.getServiceDuration(dto.service)
 		dto.serviceName = service.service
 		def serviceDuration = 	service.duration
-		def date = parseDate(dto.date)
+		def date = SchedulerUtils.parseDate(dto.date)
 		def slotRemainderTime = null
 		def breakPoint = 0
 		def slotsAvailable = []
@@ -145,34 +146,14 @@ class SlotFinderService {
 		(startTime < appointmentEndTime)  && (endTime > appointmentStartTime)
 	}
 
-	static def parseDate(inputDate) {
-		if (inputDate==null) {
-			return new Date().format("yyyy-MM-dd")
-		}
-		def currentDate = DateTime.now()
-		def dateSplit = inputDate.replaceAll("-","/").split("/")
-		def month = dateSplit[0].replace("??",String.format("%02d", currentDate.monthOfYear))
-		def date =  dateSplit[1].replace("??",String.format("%02d", currentDate.dayOfMonth))
-		def appendedDate = month+"/"+date+"/"+dateSplit[2]
-		// yyyy-MM-dd
-		// MM/dd/yyyy
-		// ??/EEE/yyyy -- Replace With current month
-		// MM/EEE/yyyy
-		// MM/??/yyyy -- Replace with current date
-		DateTimeParser[] parsers = [DateTimeFormat.forPattern("yyyy/MM/dd").parser, DateTimeFormat.forPattern("MM/dd/yyyy").parser, DateTimeFormat.forPattern("MM/EEE/yyyy").parser]
-		def formattedDate = new DateTimeFormatterBuilder().append(null, parsers).toFormatter().parseDateTime(appendedDate)
-		while (formattedDate.toLocalDate().compareTo(currentDate.toLocalDate()) < 0){
-			formattedDate = formattedDate.plusWeeks(1)
-		}
-		DateTimeFormat.forPattern("yyyy-MM-dd").print(formattedDate)
-	}
+
 
 	static main(String[] args) {
-		println parseDate("2016-02-11")
-		println parseDate("02/11/2016")
-		println parseDate("02/MON/2016")
-		println parseDate("??/FRI/2016")
-		println parseDate("??/??/2016")
-		println parseDate("02/??/2016")
+		println SchedulerUtils.parseDate("2016-02-11")
+		println SchedulerUtils.parseDate("02/11/2016")
+		println SchedulerUtils.parseDate("02/MON/2016")
+		println SchedulerUtils.parseDate("??/FRI/2016")
+		println SchedulerUtils.parseDate("??/??/2016")
+		println SchedulerUtils.parseDate("02/??/2016")
 	}
 }

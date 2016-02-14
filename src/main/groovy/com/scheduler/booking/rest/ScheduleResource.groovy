@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 
 import com.scheduler.booking.dto.BookingRequestDto
-import com.scheduler.booking.dto.ConversationDto
 import com.scheduler.booking.dto.NLPDataDto
 import com.scheduler.booking.service.ScheduleService
+import com.scheduler.booking.util.NLPClassifier
 
 @RestController
 @RequestMapping
@@ -29,7 +29,9 @@ class ScheduleResource {
 
 	@Valid
 	String url
-
+	
+	@Autowired
+	NLPClassifier classifier
 
 	@RequestMapping(value="/api/appointment", method=RequestMethod.POST)
 	def bookAppointment(@RequestBody BookingRequestDto requestDto) {
@@ -57,10 +59,16 @@ class ScheduleResource {
 		response
 	}
 
-	@RequestMapping(value="/api/appointment/finder",method=RequestMethod.GET)
+	@RequestMapping(value="/api/appointment/finder/v1",method=RequestMethod.GET)
 	def analyzeRequest(@RequestParam("message") message, @RequestParam("serviceId") serviceId ){
 		def parsedData = restTemplate.getForObject(url+message,NLPDataDto.class)
 		parsedData.service = serviceId
-		scheduleService.findAvailableSlotsForConversationRequest(parsedData)
+		scheduleService.findAvailableSlotsForNLTKResponse(parsedData)
+	}
+	
+	@RequestMapping(value="/api/appointment/finder/v2",method=RequestMethod.GET)
+	def analyzeRequestWithSentiment(@RequestParam("message") message, @RequestParam("serviceId") serviceId){
+		def nlpResults =  classifier.classify(message.split("."))
+		scheduleService.findAvailableSlotsForStanfordNLPResponse(parsedData)
 	}
 }

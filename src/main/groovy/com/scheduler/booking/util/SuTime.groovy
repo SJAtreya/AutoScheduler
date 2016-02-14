@@ -9,7 +9,7 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.time.*;
 import edu.stanford.nlp.util.CoreMap;
 
-public class SUTimeDemo {
+public class SuTime{
 
   /** Example usage:
    *  java SUTimeDemo "Three interesting dates are 18 Feb 1997, the 20th
@@ -25,7 +25,7 @@ public class SUTimeDemo {
     pipeline.addAnnotator(new POSTaggerAnnotator(false));
     pipeline.addAnnotator(new TimeAnnotator("sutime", props));
 
-    for (String text : ['Mornings are not so good.','So 11am slots are out.','4pm I can do.']) {
+    for (String text : ['Can I get a slot on wednesday between 3PM and 5PM?']) {
       Annotation annotation = new Annotation(text);
       annotation.set(CoreAnnotations.DocDateAnnotation.class, "2016-02-10");
       pipeline.annotate(annotation);
