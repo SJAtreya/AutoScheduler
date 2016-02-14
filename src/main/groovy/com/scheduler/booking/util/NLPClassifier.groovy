@@ -93,7 +93,17 @@ public class NLPClassifier {
 	//	}
 
 	static main(String[] args){
-		String[] input = ['Hey Vader, Can you find me a slot on wednesday between 3PM and 5PM or next monday at 5PM?']
+		String[] input = [
+			'Hey Vader, Can you find me a slot on wednesday between 3PM and 5PM or next monday at 5PM?',
+			"Can you find a slot for me at 10AM tomorrow?",
+			"Hey John Vader, Mornings are not so good.",
+			"how about after noon?.",
+			"or how about in the evening?.",
+			"So 11am slots are out.",
+			"I can do at 4pm. ",
+			"Can you find a slot for me at 4 PM day after?",
+			"Or I can do it tomorrow."
+		]
 		def localClassifier = new NLPClassifier()
 		localClassifier.create()
 		localClassifier.classify(input)

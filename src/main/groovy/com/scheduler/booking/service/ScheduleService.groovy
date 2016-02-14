@@ -100,8 +100,8 @@ class ScheduleService {
 	
 	def findAvailableSlotsForStanfordNLPResponse(resultsMap){
 		// Identify Request Type - BEFORE / AFTER / EARLIEST / BETWEEN
-//		def type = SchedulerUtils.findConversationRequestType(resultsMap)
 		def nlpData = SchedulerUtils.translateToNLPFormat(resultsMap)
+		def type = SchedulerUtils.findConversationRequestType(resultsMap)
 		def results = slotFinderService."${'find'+type}" nlpData
 		createConversationResponse(results)
 	}
