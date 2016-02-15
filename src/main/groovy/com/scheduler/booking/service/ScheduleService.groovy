@@ -65,6 +65,7 @@ class ScheduleService {
 		def slotToBook = null
 		if (dto.date) {
 			// Has asked for a specific date
+			dto.date = dto.date.substring(0, 10).replaceAll("/", "-") 
 			slotToBook = slotFinderService.findFirstAvailableSlot(dto,[new Slot(startTime:8.0,endTime:20.0)])
 		}
 		else {
@@ -72,7 +73,7 @@ class ScheduleService {
 		}
 		if (slotToBook != null) {
 			appointmentDAO.create(requestId, slotToBook.date, slotToBook.startTime, slotToBook.endTime)
-			return [requestedDate:dto.date.substring(0,10), proposedDate: slotToBook.date, proposedTime: slotToBook.startTime, service:dto.serviceName, id:requestId]
+			return [requestedDate:dto.date.substring(0,10), proposedDate: slotToBook.date, proposedTime: slotToBook.startTime, serviceId:dto.service, serviceName:dto.serviceName, id:requestId]
 		}
 	}
 
@@ -95,7 +96,8 @@ class ScheduleService {
 		// Identify Request Type - BEFORE / AFTER / EARLIEST / BETWEEN
 		def type = SchedulerUtils.findConversationRequestType(parsedData)
 		def results = slotFinderService."${'find'+type}" parsedData
-		createConversationResponse(results)
+//		createConversationResponse(results)
+		createJSONResponse(results)
 	}
 	
 	def findAvailableSlotsForStanfordNLPResponse(resultsMap){
@@ -122,5 +124,25 @@ class ScheduleService {
 			}
 		}
 		response.toString()
+	}
+	
+	def createJSONResponse(results) {
+		def response = [message:"I am sorry. I am unable to find a slot in the near future. Please leave your contact number, we shall get back when we find a best slot for you."]
+		if (results?.size()>0) {
+			if (results.size() == 1) {
+				response = [message:"Would a slot on ${results[0].date} at ${SchedulerUtils.convertToTimeFormat(results[0].startTime)} work for you?"]
+			} else {
+				response = [message:"I was able to find the following slots. Please let me know the best one that suits you."]
+				def options = []
+				for (def index=0; index<results.size(); index++) {
+					if (index>=3) {
+						break;
+					}
+					options.add(results[index].date + ' at ' + SchedulerUtils.convertToTimeFormat(results[index].startTime))
+				}
+				response.put("options", options)
+			}
+		}
+		response
 	}
 }

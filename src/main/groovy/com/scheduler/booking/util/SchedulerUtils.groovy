@@ -7,6 +7,9 @@ import org.joda.time.format.DateTimeParser
 
 import com.scheduler.booking.dto.NLPDataDto
 
+import edu.stanford.nlp.time.SUTime
+import edu.stanford.nlp.time.SUTime.TimexType
+
 
 
 class SchedulerUtils {
@@ -37,48 +40,52 @@ class SchedulerUtils {
 		requestType
 	}
 
-	static def translateToNLPFormat(Map response) {
-		def preferences = response.collect( {it.sentiment == 'Neutral' || it.sentiment == 'Positive'} )
-		def temporals = preferences["Temporals"]
-		if (!preferences || !temporals){
-			return [new NLPDataDto(date:null, startTime:null, endTime:null)]
-		}
-		def iterator = temporals.iterator()
-		def counter = 0
+	static def translateToNLPFormat(List nlpClassifications) {
 		def nlpResponses = []
-		def dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mi")
-		def formatToString = DateTimeFormat.forPattern("yyyy-MM-dd")
-		while (iterator.hasNext()) {
-			def parsedDateTime = parseDateAndTimeFromSuTime(iterator[counter])
-			if (dependancyRequired(parsedDateTime)) {
-				def endTime = null
-				def startTime = null
-				try {
-					def first = iterator[counter+1]
-					DateTime dateTime = dateTimeFormatter.parseDateTime(first.replaceAll("T"," "))
-					if (parsedDateTime.equals(formatToString.print(dateTime))) {
-						startTime = first.split(" ")[1]
-						counter++
+		nlpClassifications.each { classification ->
+			println classification
+			if(classification.get("Sentiment") == ['Neutral']|| classification.get("Sentiment") == ['Positive']) {
+				def temporals = classification.get("Temporals")
+				println temporals
+				if (!temporals){
+					return [new NLPDataDto(date:null, startTime:null, endTime:null)]
+				}
+				def iterator = temporals.iterator()
+				def counter = 0
+				def dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm")
+				def formatToString = DateTimeFormat.forPattern("yyyy-MM-dd")
+				while (iterator.hasNext()) {
+					def parsedDateTime = parseDateAndTimeFromSuTime(iterator[counter])
+					if (dependancyRequired(parsedDateTime)) {
+						def endTime = null
+						def startTime = null
+						try {
+							def first = iterator[counter+1]
+							DateTime dateTime = dateTimeFormatter.parseDateTime(first.replaceAll("T"," "))
+							if (parsedDateTime.equals(formatToString.print(dateTime))) {
+								startTime = first.split(" ")[1]
+								counter++
+							}
+						}
+						catch (IllegalArgumentException ae) {
+							continue;
+						}
+						try {
+							def second = iterator[counter+2]
+							DateTime dateTime = dateTimeFormatter.parseDateTime(second.replaceAll("T"," "))
+							if (parsedDateTime.equals(formatToString.print(dateTime))) {
+								endTime = second.split(" ")[1]
+								counter++
+							}
+						}
+						catch (IllegalArgumentException iae) {
+							// Fine, just add the start time alone.
+						}
+						nlpResponses.add(new NLPDataDto(date:parsedDateTime.date, startTime:startTime, endTime: endTime))
+					} else {
+						nlpResponses.add(new NLPDataDto(date:parsedDateTime.date, startTime:parsedDateTime.time))
 					}
 				}
-				catch (IllegalArgumentException ae) {
-					continue;
-				}
-				try {
-					def second = iterator[counter+2]
-					DateTime dateTime = dateTimeFormatter.parseDateTime(second.replaceAll("T"," "))
-					if (parsedDateTime.equals(formatToString.print(dateTime))) {
-						endTime = second.split(" ")[1]
-						counter++
-					}
-				} 
-				catch (IllegalArgumentException iae) {
-					// Fine, just add the start time alone. 
-				}
-				nlpResponses.add(new NLPDataDto(date:parsedDateTime.date, startTime:startTime, endTime: endTime))
-				
-			} else {
-				nlpResponses.add(new NLPDataDto(date:parsedDateTime.date, startTime:parsedDateTime.time))
 			}
 		}
 		nlpResponses
@@ -95,7 +102,7 @@ class SchedulerUtils {
 			return new Date().format("yyyy-MM-dd")
 		}
 		def currentDate = DateTime.now()
-		def dateSplit = inputDate.replaceAll("-","/").replaceAll("T"," ").split("/")
+		def dateSplit = inputDate.replaceAll("-","/").split("/")//.replaceAll("T"," ")
 		def month = dateSplit[0].replace("??",String.format("%02d", currentDate.monthOfYear))
 		def date =  dateSplit[1].replace("??",String.format("%02d", currentDate.dayOfMonth))
 		def appendedDate = month+"/"+date+"/"+dateSplit[2]
@@ -107,8 +114,8 @@ class SchedulerUtils {
 		DateTimeParser[] parsers = [
 			DateTimeFormat.forPattern("yyyy/MM/dd").parser,
 			DateTimeFormat.forPattern("MM/dd/yyyy").parser,
-			DateTimeFormat.forPattern("MM/EEE/yyyy").parser,
-			DateTimeFormat.forPattern("yyyy/MM/dd HH:mi").parser
+			DateTimeFormat.forPattern("MM/EEE/yyyy").parser
+//			DateTimeFormat.forPattern("yyyy/MM/dd HH:mm").parser
 		]
 		def formattedDate = new DateTimeFormatterBuilder().append(null, parsers).toFormatter().parseDateTime(appendedDate)
 		while (formattedDate.toLocalDate().compareTo(currentDate.toLocalDate()) < 0){
@@ -117,7 +124,7 @@ class SchedulerUtils {
 		DateTimeFormat.forPattern("yyyy-MM-dd").print(formattedDate)
 	}
 
-	static def parseDateAndTimeFromSuTime(String date) {
+	static def parseDateAndTimeFromSuTime(SUTime.PartialTime date) {
 		// [2016-02-17-WXX-3, 2016-02-14T15:00, 2016-02-14T17:00, 2016-02-08-WXX-1T17:00]
 		//[[Temporals:[2016-02-14T10:00], Sentiment:[Neutral], NER:[O]],
 		// [Temporals:[2016-02-13TMO], Sentiment:[Negative], NER:[O]],
@@ -125,37 +132,48 @@ class SchedulerUtils {
 		// [Temporals:[2016-02-13T16:00], Sentiment:[Neutral], NER:[O]],
 		// [Temporals:[2016-02-13T16:00], Sentiment:[Neutral], NER:[O]],
 		// [Temporals:[2016-02-14], Sentiment:[Neutral], NER:[O]]]
+		println date.getTime()
+		println date.getTimeLabel()
+		println date.getTimexValue()
+		println date.getTimexType()
 		def parsedDate = null
 		def time = null
-		try {
-			parsedDate = parseDate(date)
-		} catch (IllegalArgumentException iae) {
-			// Proceed with next steps
+		switch (date.getTimexType()) {
+			case TimexType.DATE:
+			case TimexType.TIME:
+			default:
+				break;
 		}
-		if (parsedDate == null) {
-			// Try other formats
-			def tempDate = date.replaceAll("T","-").split("-")
-			if (tempDate.length == 4) {
-				// 2016-02-13TMO
-				parsedDate = date.substring(0,10)
-				if ("MO".equalsIgnoreCase(tempDate)) {
-					time = 8.0
-				} else if ("EV".equalsIgnoreCase(tempDate)) {
-					time = 5.0
-				} else {
-					time = 10.0
-				}
-			}else if (tempDate.length == 5) {
-				// 2016-02-17-WXX-3
-				parsedDate = date.substring(0,10)
-			} else if (tempDate.length == 6){
-				// 2016-02-08-WXX-1-17:00.
-				parsedDate = date.substring(0,10)
-				time = convertTime(tempDate[5])
-			} else {
-				// Sorry, I don't understand. I shall learn next time:).
-			}
-		}
+
+		//		try {
+		//			parsedDate = parseDate(date)
+		//		} catch (IllegalArgumentException iae) {
+		//			// Proceed with next steps
+		//		}
+		//		if (parsedDate == null) {
+		//			// Try other formats
+		//			def tempDate = date.replaceAll("T","-").split("-")
+		//			if (tempDate.length == 4) {
+		//				// 2016-02-13TMO
+		//				parsedDate = date.substring(0,10)
+		//				if ("MO".equalsIgnoreCase(tempDate)) {
+		//					time = 8.0
+		//				} else if ("EV".equalsIgnoreCase(tempDate)) {
+		//					time = 5.0
+		//				} else {
+		//					time = 10.0
+		//				}
+		//			}else if (tempDate.length == 5) {
+		//				// 2016-02-17-WXX-3
+		//				parsedDate = date.substring(0,10)
+		//			} else if (tempDate.length == 6){
+		//				// 2016-02-08-WXX-1-17:00.
+		//				parsedDate = date.substring(0,10)
+		//				time = convertTime(tempDate[5])
+		//			} else {
+		//				// Sorry, I don't understand. I shall learn next time:).
+		//			}
+		//		}
 		[date:parsedDate, time: time]
 	}
 

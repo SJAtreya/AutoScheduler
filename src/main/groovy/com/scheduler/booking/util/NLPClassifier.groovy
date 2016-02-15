@@ -28,19 +28,19 @@ public class NLPClassifier {
 
 	@PostConstruct
 	def create() {
-		Properties props = new Properties();
-		props.setProperty("ner.model", NER_3CLASS);
-		//		def crfClassifier = CRFClassifier.getClassifier("classifiers/english.all.3class.distsim.crf.ser.gz")
-		NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
-		pipeline = new AnnotationPipeline();
-		pipeline.addAnnotator(new TokenizerAnnotator(false));
-		pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-		pipeline.addAnnotator(new POSTaggerAnnotator(false));
-		pipeline.addAnnotator(new NERCombinerAnnotator(ner, false, 1, -1))
-		pipeline.addAnnotator(new ParserAnnotator("pa", props));
-		pipeline.addAnnotator(new BinarizerAnnotator("ba", props));
-		pipeline.addAnnotator(new SentimentAnnotator("sa",props))
-		pipeline.addAnnotator(new TimeAnnotator("sutime", props));
+//		Properties props = new Properties();
+//		props.setProperty("ner.model", NER_3CLASS);
+//		//		def crfClassifier = CRFClassifier.getClassifier("classifiers/english.all.3class.distsim.crf.ser.gz")
+//		NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
+//		pipeline = new AnnotationPipeline();
+//		pipeline.addAnnotator(new TokenizerAnnotator(false));
+//		pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+//		pipeline.addAnnotator(new POSTaggerAnnotator(false));
+//		pipeline.addAnnotator(new NERCombinerAnnotator(ner, false, 1, -1))
+//		pipeline.addAnnotator(new ParserAnnotator("pa", props));
+//		pipeline.addAnnotator(new BinarizerAnnotator("ba", props));
+//		pipeline.addAnnotator(new SentimentAnnotator("sa",props))
+//		pipeline.addAnnotator(new TimeAnnotator("sutime", props));
 	}
 
 	//	(String text : [
@@ -51,7 +51,7 @@ public class NLPClassifier {
 	//			"Can you find a slot for me at 4 PM day after?",
 	//			"Or I can do it tomorrow."
 	//	])
-	def classify(String[] texts) {
+	def classify(texts) {
 		def retList = []
 		texts.each{text->
 			Annotation annotation = new Annotation(text);

@@ -94,6 +94,7 @@ class SlotFinderService {
 		calendar.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(date.substring(0,10)))
 		def currentDay = calendar.get(Calendar.DAY_OF_WEEK)
 		def daysToAdd
+		requestedDate = requestedDate?:new Date().format("yyyy-MM-dd")
 		if (requestedDate.replaceAll("-","/").split("/")[1].length()>2) {
 			daysToAdd = 7
 		} else {

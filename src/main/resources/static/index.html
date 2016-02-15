@@ -5,15 +5,15 @@
 <title>Appointment Booking Request Simulator</title>
 <link rel="stylesheet" href="styles/bootstrap.min.css" />
 <link rel="stylesheet" href="styles/bootstrap-datetimepicker.min.css" />
-<link rel="stylesheet" href="styles/jquery-ui.min.css"/>
-<link rel="stylesheet" href="styles/jquery-ui.structure.min.css"/>
-<link rel="stylesheet" href="styles/jquery-ui.theme.min.css"/>
-<link rel="stylesheet" href="styles/scheduler.css"/>
+<link rel="stylesheet" href="styles/jquery-ui.min.css" />
+<link rel="stylesheet" href="styles/jquery-ui.structure.min.css" />
+<link rel="stylesheet" href="styles/jquery-ui.theme.min.css" />
+<link rel="stylesheet" href="styles/scheduler.css" />
 </head>
 <body>
 	<div class="container">
 		<div class="jumbotron">
-			<h1>Auto Scheduler Demo</h1>
+			<h2>Auto-Scheduler & Vader Demo</h2>
 		</div>
 
 		<div class="row">
@@ -51,8 +51,10 @@
 		<div class="row">
 			<div>
 				<ul class="nav nav-pills">
-					<li id="tab1" role="presentation" class="active"><a href="#tabs-1">Appointment Booking Status</a></li>
-					<li id="tab2" role="presentation"><a href="#tabs-2">Provider Schedule</a></li>
+					<li id="tab1" role="presentation" class="active"><a
+						href="#tabs-1">Appointment Booking Status</a></li>
+					<li id="tab2" role="presentation"><a href="#tabs-2">Provider
+							Schedule</a></li>
 				</ul>
 				<div id="tabs-1" class="borderEnabled">
 					<table class="table table-striped" id="results" name="results">
@@ -61,6 +63,7 @@
 							<th>Requested Date</th>
 							<th>Proposed Date</th>
 							<th>Proposed Time</th>
+							<th>Questions?</th>
 						</tr>
 					</table>
 				</div>
@@ -69,7 +72,33 @@
 				</div>
 			</div>
 		</div>
-
+		<div id="chatModal" name="chatModal" class="modal fade" tabindex="-1"
+			role="dialog">
+			<div class="modal-dialog modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title">Chat with Vader</h4>
+					</div>
+					<div class="modal-body" style="height:400px;overflow-y:auto" id="chatContent"></div>
+					<div class="modal-footer">
+						<form>
+							<input type="hidden" id="serviceId"/>
+							<div class="form-group">
+								<input id="message" type="text" class="form-control" placeholder="your message...">
+							</div>
+							<button id="findAppointment" name="findAppointment" type="submit" class="btn btn-default">Send</button>
+						</form>
+					</div>
+				</div>
+				<!-- /.modal-content -->
+			</div>
+			<!-- /.modal-dialog -->
+		</div>
+		<!-- /.modal -->
 		<script type="text/javascript" src="scripts/jquery.min.js"></script>
 		<script type="text/javascript" src="scripts/moment.min.js"></script>
 		<script type="text/javascript" src="scripts/bootstrap.min.js"></script>
@@ -79,7 +108,7 @@
 		<script type="text/javascript" src="scripts/canvasjs.min.js"></script>
 		<script type="text/javascript" src="scripts/jquery.canvasjs.min.js"></script>
 		<script type="text/javascript" src="scripts/autoscheduler.js"></script>
-		
+
 		<script>
 			$(document).ready(function() {
 				setup();
