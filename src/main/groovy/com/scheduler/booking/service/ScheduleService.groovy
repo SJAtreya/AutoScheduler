@@ -100,12 +100,16 @@ class ScheduleService {
 		createJSONResponse(results)
 	}
 	
-	def findAvailableSlotsForStanfordNLPResponse(resultsMap){
+	def findAvailableSlotsForStanfordNLPResponse(resultsMap, serviceId){
 		// Identify Request Type - BEFORE / AFTER / EARLIEST / BETWEEN
-		def nlpData = SchedulerUtils.translateToNLPFormat(resultsMap)
-		def type = SchedulerUtils.findConversationRequestType(resultsMap)
-		def results = slotFinderService."${'find'+type}" nlpData
-		createConversationResponse(results)
+		def nlpData = SchedulerUtils.translateToNLPFormat resultsMap, serviceId
+		def results = []
+		nlpData.each {
+			def type = SchedulerUtils.findConversationRequestType it
+			results += slotFinderService."${'find'+type}" it
+		}
+		//	createConversationResponse(results)
+		createJSONResponse(results)
 	}
 
 	def createConversationResponse(results) {

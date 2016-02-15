@@ -111,11 +111,10 @@ function findAppointment(){
 	var message = $('#message').val();
 	var serviceId = $('#serviceId').val();
 	var options = ''
-	$.getJSON('/api/appointment/finder/v1',{"message":message,"serviceId":serviceId},function(data){
+	$.getJSON('/api/appointment/finder/v2',{"message":message,"serviceId":serviceId},function(data){
 		options = (data.options!=null || data.options!= undefined)?data.options:''
 		$('#chatContent').append('<div class="row" style="padding-top:10px"><div class="col-md-4 col-md-offset-1" style="background-color:#ADD8E6;border-radius:5px"><strong>Me:</strong> '+message+'</div></div>').
 		append('<div class="row" style="padding-top:10px"><div class="col-md-6 col-md-offset-5" style="background-color:#a4f2c1;border-radius:5px"><strong>Vader: </strong>'+data.message+'<br/><br/>'+options+'</div></div>');
-		
+		$('#message').val('');
 	});
-	$('#message').val('');
 }

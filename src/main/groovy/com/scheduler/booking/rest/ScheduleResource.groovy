@@ -69,6 +69,6 @@ class ScheduleResource {
 	@RequestMapping(value="/api/appointment/finder/v2",method=RequestMethod.GET)
 	def analyzeRequestWithSentiment(@RequestParam("message") message, @RequestParam("serviceId") serviceId){
 		def nlpResults =  classifier.classify(message.contains(".")?message.split("."):[message])
-		scheduleService.findAvailableSlotsForStanfordNLPResponse(nlpResults)
+		scheduleService.findAvailableSlotsForStanfordNLPResponse(nlpResults, serviceId)
 	}
 }

@@ -28,19 +28,19 @@ public class NLPClassifier {
 
 	@PostConstruct
 	def create() {
-//		Properties props = new Properties();
-//		props.setProperty("ner.model", NER_3CLASS);
-//		//		def crfClassifier = CRFClassifier.getClassifier("classifiers/english.all.3class.distsim.crf.ser.gz")
-//		NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
-//		pipeline = new AnnotationPipeline();
-//		pipeline.addAnnotator(new TokenizerAnnotator(false));
-//		pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
-//		pipeline.addAnnotator(new POSTaggerAnnotator(false));
-//		pipeline.addAnnotator(new NERCombinerAnnotator(ner, false, 1, -1))
-//		pipeline.addAnnotator(new ParserAnnotator("pa", props));
-//		pipeline.addAnnotator(new BinarizerAnnotator("ba", props));
-//		pipeline.addAnnotator(new SentimentAnnotator("sa",props))
-//		pipeline.addAnnotator(new TimeAnnotator("sutime", props));
+		Properties props = new Properties();
+		props.setProperty("ner.model", NER_3CLASS);
+		//		def crfClassifier = CRFClassifier.getClassifier("classifiers/english.all.3class.distsim.crf.ser.gz")
+		NERClassifierCombiner ner = NERClassifierCombiner.createNERClassifierCombiner("ner", props);
+		pipeline = new AnnotationPipeline();
+		pipeline.addAnnotator(new TokenizerAnnotator(false));
+		pipeline.addAnnotator(new WordsToSentencesAnnotator(false));
+		pipeline.addAnnotator(new POSTaggerAnnotator(false));
+		pipeline.addAnnotator(new NERCombinerAnnotator(ner, false, 1, -1))
+		pipeline.addAnnotator(new ParserAnnotator("pa", props));
+		pipeline.addAnnotator(new BinarizerAnnotator("ba", props));
+		pipeline.addAnnotator(new SentimentAnnotator("sa",props))
+		pipeline.addAnnotator(new TimeAnnotator("sutime", props));
 	}
 
 	//	(String text : [
@@ -55,8 +55,8 @@ public class NLPClassifier {
 		def retList = []
 		texts.each{text->
 			Annotation annotation = new Annotation(text);
-			annotation.set(CoreAnnotations.DocDateAnnotation.class, '2016-02-14');
-			//	  annotation.set(CoreAnnotations.SentencesAnnotation.class, new Date().format("yyyy-MM-dd"));
+			annotation.set(CoreAnnotations.DocDateAnnotation.class, new Date().format("yyyy-MM-dd"));
+			//	  annotation.set(CoreAnnotations.SentencesAnnotation.class, );
 			//			annotation.set(CoreAnnotations.SemanticWordAnnotation.class, new Date().format("yyyy-MM-dd"));
 			pipeline.annotate(annotation);
 			System.out.println(annotation.get(CoreAnnotations.TextAnnotation.class));
