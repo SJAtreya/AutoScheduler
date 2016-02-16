@@ -16,6 +16,9 @@ import com.scheduler.booking.dto.NLPDataDto
 import com.scheduler.booking.service.ScheduleService
 import com.scheduler.booking.util.NLPClassifier
 
+import edu.stanford.nlp.ling.Sentence
+import edu.stanford.nlp.process.DocumentPreprocessor
+
 @RestController
 @RequestMapping
 @ConfigurationProperties(prefix="nlp")
@@ -67,8 +70,9 @@ class ScheduleResource {
 	}
 	
 	@RequestMapping(value="/api/appointment/finder/v2",method=RequestMethod.GET)
-	def analyzeRequestWithSentiment(@RequestParam("message") message, @RequestParam("serviceId") serviceId){
-		def nlpResults =  classifier.classify(message.contains(".")?message.split("."):[message])
+	def analyzeRequestWithSentiment(@RequestParam("message") String message, @RequestParam("serviceId") serviceId){
+		def sentences = new DocumentPreprocessor(new StringReader(message)).collect {Sentence.listToString(it)}
+		def nlpResults =  classifier.classify(sentences)
 		scheduleService.findAvailableSlotsForStanfordNLPResponse(nlpResults, serviceId)
 	}
 }

@@ -1,11 +1,12 @@
 package com.scheduler.booking.util
 
-import javax.annotation.PostConstruct;
+import javax.annotation.PostConstruct
 
 import org.springframework.stereotype.Component
 
 import edu.stanford.nlp.ie.NERClassifierCombiner
 import edu.stanford.nlp.ling.CoreAnnotations
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations
 import edu.stanford.nlp.pipeline.*
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 import edu.stanford.nlp.time.*
@@ -70,6 +71,7 @@ public class NLPClassifier {
 				sentence.get(CoreAnnotations.TokensAnnotation.class).each { token ->
 					addToMap(resultsMap, "NER", token.ner())
 				}
+				println RNNCoreAnnotations.getPredictedClass(sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class))
 			}
 			System.out.println("--");
 			retList.add(resultsMap)

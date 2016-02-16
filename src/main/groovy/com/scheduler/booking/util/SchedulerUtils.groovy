@@ -1,5 +1,7 @@
 package com.scheduler.booking.util
 
+import java.time.format.DateTimeFormatter;
+
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatterBuilder
@@ -50,7 +52,7 @@ class SchedulerUtils {
 				}
 				def iterator = temporals.iterator()
 				def counter = 0
-				def dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm")
+				def dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm")
 				def formatToString = DateTimeFormat.forPattern("yyyy-MM-dd")
 				while (iterator.hasNext()) {
 					def parsedDateTime = parseDateAndTimeFromSuTime(iterator[counter].toString())
@@ -58,22 +60,26 @@ class SchedulerUtils {
 						def endTime = null
 						def startTime = null
 						try {
-							def first = iterator[counter+1]
-							DateTime dateTime = dateTimeFormatter.parseDateTime(first.replaceAll("T"," "))
-							if (parsedDateTime.equals(formatToString.print(dateTime))) {
-								startTime = first.split(" ")[1]
-								counter++
+							def firstSlot = iterator[counter].toString()
+							if (firstSlot!=null) {
+								DateTime dateTime = dateTimeFormatter.parseDateTime(firstSlot)
+								startTime = dateTime.hourOfDay
+								println "Starting Time:"
+								println "${startTime}"
+//								counter++
 							}
 						}
 						catch (IllegalArgumentException ae) {
 							continue;
 						}
 						try {
-							def second = iterator[counter+2]
-							DateTime dateTime = dateTimeFormatter.parseDateTime(second.replaceAll("T"," "))
-							if (parsedDateTime.equals(formatToString.print(dateTime))) {
-								endTime = second.split(" ")[1]
-								counter++
+							def secondSlot = iterator[counter].toString()
+							if (secondSlot != null) {
+								DateTime dateTime = dateTimeFormatter.parseDateTime(secondSlot)
+								endTime = dateTime.hourOfDay
+								println "Ending Time:"
+								println "${endTime}"
+//								counter++
 							}
 						}
 						catch (IllegalArgumentException iae) {
@@ -151,9 +157,18 @@ class SchedulerUtils {
 			// Proceed with next steps
 		}
 		if (parsedDate == null) {
-			// Try other formats
+			// Pure ISO
 			try {
-				parsedDate = ISODateTimeFormat.dateTime().parseDateTime(date)
+				ISODateTimeFormat.dateTime().parseDateTime(date)
+				parsedDate = date.substring(0,10)
+				startTime = date.substring(11,13)
+			} catch (IllegalArgumentException e){
+				// Try other formats
+			}
+			try {
+				DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm").parseDateTime(date)
+				parsedDate = date.substring(0,10)
+				startTime = date.substring(11,13).asType(Integer.class)
 			} catch (IllegalArgumentException e){
 				// Try other formats
 			}

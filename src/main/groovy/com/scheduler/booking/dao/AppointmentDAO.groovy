@@ -1,7 +1,6 @@
 package com.scheduler.booking.dao
 
-import java.text.SimpleDateFormat
-
+import org.joda.time.format.DateTimeFormat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.BeanPropertyRowMapper
 import org.springframework.jdbc.core.JdbcTemplate
@@ -17,7 +16,7 @@ class AppointmentDAO {
 
 	def create(requestId, date, startTime, endTime) {
 		def insertQuery = "INSERT INTO appointment (booking_request_id, date, start_time, end_time) VALUES (?, ?, ?, ?)"
-		jdbcTemplate.update(insertQuery, requestId, new SimpleDateFormat("yyyy-MM-dd").parse(date), startTime, endTime)
+		jdbcTemplate.update(insertQuery, requestId, date, startTime, endTime)
 	}
 
 	def findAppointmentsForDate(date) {

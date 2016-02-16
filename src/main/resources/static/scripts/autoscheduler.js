@@ -52,7 +52,10 @@ function setup() {
 		event.preventDefault();
 		findAppointment();
 	});
-//	$('#chatModal').modal();
+	$('#clearChat').click(function(event) {
+		event.preventDefault();
+		clearChat();
+	});
 	setInterval(updateProviderSchedule, 5000)
 };
 
@@ -103,7 +106,7 @@ function updateProviderSchedule() {
 function openModal(serviceId) {
 	$('#chatModal').modal('show');
 	$('#serviceId').val(serviceId);
-	$('#chatContent').val('');
+	$('#chatContent').html('');
 	setTimeout(function(){$('#chatContent').append('<div class="row" style="padding-top:10px"><div class="col-md-6 col-md-offset-5" style="background-color:#a4f2c1;border-radius:5px"><strong>Vader: </strong>Hello, I\'m Vader. How may I assist you?</div></div>')},1000);
 }
 
@@ -112,9 +115,13 @@ function findAppointment(){
 	var serviceId = $('#serviceId').val();
 	var options = ''
 	$.getJSON('/api/appointment/finder/v2',{"message":message,"serviceId":serviceId},function(data){
-		options = (data.options!=null || data.options!= undefined)?data.options:''
+		options = (data.options!=null || data.options!= undefined)?data.options.join("<br/>"):''
 		$('#chatContent').append('<div class="row" style="padding-top:10px"><div class="col-md-4 col-md-offset-1" style="background-color:#ADD8E6;border-radius:5px"><strong>Me:</strong> '+message+'</div></div>').
 		append('<div class="row" style="padding-top:10px"><div class="col-md-6 col-md-offset-5" style="background-color:#a4f2c1;border-radius:5px"><strong>Vader: </strong>'+data.message+'<br/><br/>'+options+'</div></div>');
 		$('#message').val('');
 	});
+}
+
+function clearChat() {
+	$('#chatContent').html('');
 }
