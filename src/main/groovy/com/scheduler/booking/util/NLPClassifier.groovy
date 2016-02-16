@@ -96,7 +96,7 @@ public class NLPClassifier {
 
 	static main(String[] args){
 		String[] input = [
-			'Hey Vader, Can you find me a slot on wednesday between 3PM and 5PM or next monday at 5PM?',
+			'Hey, Can you find me a slot on wednesday between 3PM and 5PM or next monday at 5PM?',
 			"Can you find a slot for me at 10AM tomorrow?",
 			"Hey John Vader, Mornings are not so good.",
 			"how about after noon?.",
